@@ -8,15 +8,13 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-JSONParser myCity;
+CityInfo cityInfo;
+CityStatus cityStatus;
 
-JSONParser::JSONParser()
-{
+void printCityInfo();
+void printCityStatus();
 
-}
-
-void JSONParser::parseInfo(char *inputData)
-{
+void parseInfo(char *inputData) {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
 	if (error == ArduinoJson::DeserializationError::Ok)
@@ -26,15 +24,34 @@ void JSONParser::parseInfo(char *inputData)
 		cityInfo.humidity = doc["KERAPolisInfo"]["humidity"];
 		cityInfo.temperature = doc["KERAPolisInfo"]["temperature"];
     printCityInfo();
-	} else {
+	}
+#ifdef TELL
+	else {
     Serial.println("problem parsing json");
 	}
+#endif
+}
+
+void parseEvent(char *inputData) {
+  ArduinoJson::StaticJsonDocument<250> doc;
+  ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
+  if (error == ArduinoJson::DeserializationError::Ok)
+  {
+    //cityInfo.time = doc["KERAPolisInfo"]["time"];
+    //cityInfo.lightPrice = doc["KERAPolisInfo"]["lightPrice"];
+    //cityInfo.humidity = doc["KERAPolisInfo"]["humidity"];
+    //cityInfo.temperature = doc["KERAPolisInfo"]["temperature"];
+    //printCityInfo();
+  }
+#ifdef TELL
+  else {
+    Serial.println("problem parsing json");
+  }
+#endif
 }
 
 
-std::string JSONParser::encodeStatus()
-{
-  
+std::string encodeStatus() {
 	char statusJSON[800];
 	ArduinoJson::StaticJsonDocument<800> doc;
 
@@ -55,12 +72,11 @@ std::string JSONParser::encodeStatus()
   doc["KERAPolisStatus"]["waterPressure"] = cityStatus.waterPressure;
   doc["KERAPolisStatus"]["waterPumpPercentage"] = cityStatus.waterPumpPercentage;
 	ArduinoJson::serializeJson(doc, statusJSON); 
-  //printCityStatus();
+  printCityStatus();
 	return std::string(statusJSON);
 }
     
-void JSONParser::printCityInfo()
-{
+void printCityInfo() {
     Serial.print("KERAPolis Info received -->");
     Serial.print("[time:");
     Serial.print(cityInfo.time);
@@ -72,8 +88,7 @@ void JSONParser::printCityInfo()
     Serial.println();        
 }
 
-void JSONParser::printCityStatus()
-{
+void printCityStatus() {
     Serial.print("KERAPolis STATUS SENT --> ");
     Serial.print("[time:");
     Serial.print(cityStatus.frameTime.c_str());

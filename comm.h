@@ -5,13 +5,13 @@
 #include <WiFiUdp.h>
 
 // WiFi IDs
-static const char *networkName = "UJI";
-static const char *networkPswd = "";
+//static const char *networkName = "UJI";
+//static const char *networkPswd = "";
 // fn0102453cs61
 // hacks20199161
-//static const char * networkName = "KERAPolis";
-//static const char * networkPswd = "9876543210";
-static const char *serverAddress = "10.1.14.130";
+static const char * networkName = "KERAPolis";
+static const char * networkPswd = "9876543210";
+static const char *serverAddress = "192.168.0.108";
 static const int udpPort = 54321;
 
 // Client Functions
