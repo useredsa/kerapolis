@@ -8,12 +8,14 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
+JSONParser myCity;
+
 JSONParser::JSONParser()
 {
 
 }
 
-void JSONParser::getCityInfoFromNetwork(char *inputData)
+void JSONParser::parseInfo(char *inputData)
 {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
@@ -30,7 +32,7 @@ void JSONParser::getCityInfoFromNetwork(char *inputData)
 }
 
 
-std::string JSONParser::setCityStatusToNetwork()
+std::string JSONParser::encodeStatus()
 {
   
 	char statusJSON[800];

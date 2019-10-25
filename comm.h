@@ -4,14 +4,14 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
-// WiFi network name and password:
-static const char * networkName = "KERAPolis";    // fn0102453cs61
-static const char * networkPswd = "9876543210";   // hacks20199161
-
-//IP address to send UDP data to:
-// either use the ip address of the server or 
-// a network broadcast address
-static const char * udpAddress = "10.1.14.130";
+// WiFi IDs
+static const char *networkName = "UJI";
+static const char *networkPswd = "";
+// fn0102453cs61
+// hacks20199161
+//static const char * networkName = "KERAPolis";
+//static const char * networkPswd = "9876543210";
+static const char *serverAddress = "10.1.14.130";
 static const int udpPort = 54321;
 
 // Client Functions
@@ -26,5 +26,10 @@ void connectToWiFi(const char * ssid, const char * pwd);
 
 //wifi event handler
 void WiFiEvent(WiFiEvent_t event);
+
+/**
+ * @brief Sends KERAPolisStatus message to the server. Use when connected.
+ */
+void sendCityStatus();
 
 #endif

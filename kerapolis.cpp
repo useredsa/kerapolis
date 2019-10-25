@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include "comm.h"
 #include "JSONParser.h"
 
@@ -11,34 +13,27 @@ void setup(){
 
 const int pkgBuffSize = 500;
 char pkgBuff[pkgBuffSize];
- parser;
 
 void loop(){
-  //only send data when connected
-  if(connected){
-    //Send a packet
-    udp.beginPacket(udpAddress,udpPort);
-    udp.printf("Seconds since boot: %lu", millis()/1000);
-    udp.endPacket();
-  }
-  //Wait for 1 second
-  delay(1000);
 
-  if (connected) {
-    int pkgSize = udp.parsePacket();
-    if (pkgSize) {
-      if (udp.remotePort() == 54336) {
-        Serial.println("Received packet");
-        int len = udp.read(pkgBuff, pkgBuffSize);
-        if (len > 0) pkgBuff[len] = 0;
-        Serial.println(pkgBuff);
-        parser.getCityInfoFromNetwork(pkgBuff);
-      } else {
-        Serial.print("Received packet from ");
-        Serial.println(udp.remotePort());
-        udp.read(pkgBuff, pkgBuffSize);
-      }
-    }
-  }
+//  if (connected) {
+//    int pkgSize = udp.parsePacket();
+//    if (pkgSize) {
+//      if (udp.remotePort() == 54336) {
+//        Serial.println("Received packet");
+//        int len = udp.read(pkgBuff, pkgBuffSize);
+//        if (len > 0) pkgBuff[len] = 0;
+//        Serial.println(pkgBuff);
+//        parser.getCityInfoFromNetwork(pkgBuff);
+//      } else {
+//        Serial.print("Received packet from ");
+//        Serial.println(udp.remotePort());
+//        udp.read(pkgBuff, pkgBuffSize);
+//      }
+//    }
+//  }
   //delay(10);
+  if (connected) {
+    sendCityStatus();
+  }
 }

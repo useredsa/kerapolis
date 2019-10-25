@@ -19,4 +19,6 @@ class JSONParser
 
 };
 
+extern JSONParser myCity;
+
 #endif

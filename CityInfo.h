@@ -9,6 +9,7 @@ class CityInfo
     		double lightPrice;
     		double temperature;
     		int humidity;
+        int timeZone();
 };
 
 #endif

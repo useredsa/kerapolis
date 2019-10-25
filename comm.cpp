@@ -1,10 +1,6 @@
 #include "comm.h"
-const char* ssid     = "yourssid";
-const char* password = "yourpasswd";
-
-WiFiServer server(54321);
-
-int value = 0;
+#include "JSONParser.h"
+#include <string>
 
 boolean connected = false;
 WiFiUDP udp;
@@ -43,6 +39,10 @@ void WiFiEvent(WiFiEvent_t event){
 }
 
 void sendCityStatus() {
-  
-}
+  udp.beginPacket(serverAddress, udpPort);
+  std::string s = myCity.encodeStatus(); //TODO ask for string reference
+  for (size_t i = 0; i < s.size(); i++) {
+    udp.write((uint8_t) s[i]);
+  }
+  udp.endPacket();
 }
