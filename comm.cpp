@@ -11,7 +11,6 @@ WiFiUDP udp;
 
 void connectToWiFi(const char * ssid, const char * pwd){
   Serial.println("Connecting to WiFi network: " + String(ssid));
-
   // delete old config
   WiFi.disconnect(true);
   //register event handler
@@ -33,7 +32,6 @@ void WiFiEvent(WiFiEvent_t event){
           //initializes the UDP state
           //This initializes the transfer buffer
           udp.begin(WiFi.localIP(), udpPort);
-          udp.begin(udpPort);
           connected = true;
           break;
       case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -42,4 +40,9 @@ void WiFiEvent(WiFiEvent_t event){
           break;
       default: break;
     }
+}
+
+void sendCityStatus() {
+  
+}
 }

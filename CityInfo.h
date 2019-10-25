@@ -1,10 +1,10 @@
-#ifndef TKERAPolisInfoH
-#define TKERAPolisInfoH
+#ifndef KERAPOLIS_CITYINFO_H
+#define KERAPOLIS_CITYINFO_H
 
-class TKERAPolisInfo
+class CityInfo
 {
 	public:
-        TKERAPolisInfo();
+        CityInfo();
     		const char *time;
     		double lightPrice;
     		double temperature;

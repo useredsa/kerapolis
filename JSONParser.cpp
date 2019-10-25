@@ -2,17 +2,18 @@
 
 #pragma hdrstop
 
-#include "TCityJSONParser.h"
+#include "JSONParser.h"
+#include <ArduinoJson.h>
 #include <string>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-TCityJSONParser::TCityJSONParser()
+JSONParser::JSONParser()
 {
 
 }
 
-void TCityJSONParser::getCityInfoFromNetwork(char *inputData)
+void JSONParser::getCityInfoFromNetwork(char *inputData)
 {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
@@ -29,7 +30,7 @@ void TCityJSONParser::getCityInfoFromNetwork(char *inputData)
 }
 
 
-std::string TCityJSONParser::setCityStatusToNetwork()
+std::string JSONParser::setCityStatusToNetwork()
 {
   
 	char statusJSON[800];
@@ -56,7 +57,7 @@ std::string TCityJSONParser::setCityStatusToNetwork()
 	return std::string(statusJSON);
 }
     
-void TCityJSONParser::printCityInfo()
+void JSONParser::printCityInfo()
 {
     Serial.print("KERAPolis Info received -->");
     Serial.print("[time:");
@@ -69,7 +70,7 @@ void TCityJSONParser::printCityInfo()
     Serial.println();        
 }
 
-void TCityJSONParser::printCityStatus()
+void JSONParser::printCityStatus()
 {
     Serial.print("KERAPolis STATUS SENT --> ");
     Serial.print("[time:");
