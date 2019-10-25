@@ -1,7 +1,8 @@
-#define DEBUG
+#define TELL
 
-#include "comm.h"
 #include "JSONParser.h"
+#include "comm.h"
+#include "lights.h"
 
 void setup(){
   // Initilize hardware serial:
@@ -32,8 +33,8 @@ void loop(){
 //      }
 //    }
 //  }
-  //delay(10);
   if (connected) {
     sendCityStatus();
   }
+  delay(1000);
 }

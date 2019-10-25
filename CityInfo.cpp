@@ -10,11 +10,11 @@ CityInfo::CityInfo()
   : time(""), lightPrice(0.0), temperature(0.0), humidity(0)
 {}
 
-CityInfo::timeZone() {
+int CityInfo::timeZone() {
   int h = ((int)(time[0]-'0'))*10+(int)(time[1]-'0');
   int m = ((int)(time[3]-'0'))*10+(int)(time[4]-'0');
   int r = 2*h+(m>=30);
-#ifdef DEBUG
+#ifdef TELL
   if (r < 0 || r >= 48) {
     Serial.print("Wrong timezone: ");
     Serial.print(r);

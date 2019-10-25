@@ -1,8 +1,8 @@
 #include "lights.h"
-
+#include "JSONParser.h"
 
 
 void setLightIntensity() {
-  int i = miCity.cityInfo.timeZone();
+  int i = myCity.cityInfo.timeZone();
   
 }

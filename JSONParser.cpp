@@ -55,7 +55,7 @@ std::string JSONParser::encodeStatus()
   doc["KERAPolisStatus"]["waterPressure"] = cityStatus.waterPressure;
   doc["KERAPolisStatus"]["waterPumpPercentage"] = cityStatus.waterPumpPercentage;
 	ArduinoJson::serializeJson(doc, statusJSON); 
-  printCityStatus();
+  //printCityStatus();
 	return std::string(statusJSON);
 }
     
