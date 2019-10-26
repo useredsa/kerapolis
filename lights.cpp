@@ -92,10 +92,6 @@ void checkLightStatus() {
 void manageEvents() {
   for (int i = 0; i < maxNumEvents; i++) {
     if (cityEvents[i].status == CityEvent::Status::NOT_STARTED) {
-//      Serial.print("Event: ");
-//      Serial.print(cityEvents[i].startTime.toString());
-//      Serial.print("  ");
-//      Serial.println(cityEvents[i].endTime.toString());
       if (cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
         cityEvents[i].status = CityEvent::Status::STARTED;
         cityEvents[i].zone = 1;
