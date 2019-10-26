@@ -4,6 +4,15 @@
 #include "comm.h"
 #include "Arduino.h"
 #include "lights.h"
+#include "ESP32_Servo.h"
+#include "PID_v1.h"
+
+#define WRITE_ETHERNET(cmd, param) 0
+#define READ_ETHERNET(N) N
+
+Servo farmWindow;
+double input, output, setpoint;
+PID pressureControl(&input, &output, &setpoint, 0, 0, 0, DIRECT);
 
 void setup(){
   // Initilize hardware serial:
@@ -12,7 +21,16 @@ void setup(){
   // Connect to the WiFi network
   connectToWiFi(networkName, networkPswd);
   cityStatus.lightRunning = true;
+  cityStatus.farmRunning = true;
+  cityStatus.waterRunning = true;
   initLights();
+  // Connect farm servo
+  farmWindow.attach(13);
+  farmWindow.write(0);
+  cityStatus.farmRoofPosition = 0;
+  //PID Initialization
+  input = 0;
+  setpoint = 50;
 }
 
 const int pkgBuffSize = 500;
@@ -72,7 +90,7 @@ void loop(){
 
   manageEvents();
   setLightIntensity();
-  
+
   int mil = millis();
   if (lastCheck+lightCheckLapsus < mil) {
     lastCheck = mil;
@@ -85,5 +103,25 @@ void loop(){
     Serial.println(cityInfo.localTime().toString());
     cityStatus.frameTime = cityInfo.localTime();
     sendCityStatus();
+  }
+
+  if(cityInfo.temperature > 27 && farmWindow.read() < 10){
+    farmWindow.write(180);
+    cityStatus.farmRoofPosition = 0;
+  }
+  else if(cityInfo.temperature <= 27 && farmWindow.read() > 170){
+    farmWindow.write(0);
+    cityStatus.farmRoofPosition = 2;
+  }
+
+  if(cityInfo.humidity < 50 && READ_ETHERNET(0) < 10){
+    WRITE_ETHERNET(1, 1);
+    WRITE_ETHERNET(2, 1);
+    cityStatus.farmWatering = 1;
+  }
+  else if(cityInfo.humidity >= 50 && READ_ETHERNET(50) > 10){
+    WRITE_ETHERNET(1, 0);
+    WRITE_ETHERNET(2, 0);
+    cityStatus.farmWatering = 0;
   }
 }
