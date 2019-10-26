@@ -8,7 +8,7 @@
 
 CityStatus::CityStatus()
 	:
-		frameTime("0:00:00"),
+		frameTime("00:00:00"),
 		farmRunning(false),
 		waterRunning(false),
 		lightRunning(false),

@@ -40,11 +40,7 @@ void WiFiEvent(WiFiEvent_t event){
 
 void sendCityStatus() {
   udp.beginPacket(serverAddress, udpPort);
-  std::string s = encodeStatus(); //TODO ask for string reference
-  udp.printf("a");
-  //udp.printf("%s", s.c_str());
-  //for (size_t i = 0; i < s.size(); i++) {
-    //udp.write((uint8_t) s[i]);
-  //}
+  std::string s = encodeStatus(); //TODO better use string reference (string&) or char*
+  udp.printf("%s", s.c_str());
   udp.endPacket();
 }

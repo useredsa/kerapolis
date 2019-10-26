@@ -8,7 +8,7 @@
 //static const char *networkName = "UJI";
 //static const char *networkPswd = "";
 // fn0102453cs61
-// hacks20199161
+// hacks20199161u
 static const char * networkName = "KERAPolis";
 static const char * networkPswd = "9876543210";
 static const char *serverAddress = "192.168.0.108";

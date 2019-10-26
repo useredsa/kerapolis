@@ -17,8 +17,7 @@ void printCityStatus();
 void parseInfo(char *inputData) {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
-	if (error == ArduinoJson::DeserializationError::Ok)
-	{
+	if (error == ArduinoJson::DeserializationError::Ok) {
 		cityInfo.time = doc["KERAPolisInfo"]["time"];
 		cityInfo.lightPrice = doc["KERAPolisInfo"]["lightPrice"];
 		cityInfo.humidity = doc["KERAPolisInfo"]["humidity"];

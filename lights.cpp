@@ -3,69 +3,99 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
-uint16_t crc16(uint8_t *nData, uint16_t wLength);
-
 HardwareSerial ledSerial(1);
-
 uint8_t out[5];
 uint8_t in[4];
+uint16_t crc16(uint8_t *nData, uint16_t wLength);
+
+#define ALL     0x00
+#define ENABLE  0x04
+#define QUERY   0x02
+#define TURNON  0x08
+#define TURNOFF 0x09
+#define SETPOW  0x07
+
+
+#define SEND(who, opcode)         \
+  do {                            \
+    out[0] = (uint8_t) who;       \
+    out[1] = (uint8_t) opcode;    \
+    int crc = crc16(out, 2);      \
+    out[2] = (uint8_t) crc;       \
+    out[3] = (uint8_t) (crc>>8);  \
+    ledSerial.write(out, 4);      \
+    ledSerial.flush();            \
+  } while (0)
+
+#define SENDP(who, opcode, param) \
+  do {                            \
+    out[0] = (uint8_t) who;       \
+    out[1] = (uint8_t) opcode;    \
+    out[2] = (uint8_t) param;     \
+    int crc = crc16(out, 3);      \
+    out[3] = (uint8_t) crc;       \
+    out[4] = (uint8_t) (crc>>8);  \
+    ledSerial.write(out, 5);      \
+    ledSerial.flush();            \
+  } while (0)
+
+
+const int numLights = 18;
+int lightIntensity = 0;
 
 void initLights(){
   pinMode(RE_KERALIGHTS, OUTPUT);
   pinMode(DE_KERALIGHTS, OUTPUT);
-
+  // Initialize pins to write
+  digitalWrite(RE_KERALIGHTS, HIGH);
+  digitalWrite(DE_KERALIGHTS, HIGH);
+  // Initialize connection
   ledSerial.begin(115200, SERIAL_8E1, RX_KERALIGHTS, TX_KERALIGHTS);
+  SEND(ALL, ENABLE);
+}
 
-  ledSerial.write(0x00);
-  ledSerial.write(0x04);
-  ledSerial.write(0x00);
-  ledSerial.write(0x73);
-  ledSerial.flush();
+void setLightIntensity() {
+  int i = cityInfo.timeZone();
+//  Serial.print("Setting light intensity to: ");
+//  Serial.println(lightGraphic[i]);
+  // Only update on change:
+  if (lightIntensity != lightGraphic[i]) {
+    // Set pins to write
+    digitalWrite(RE_KERALIGHTS, HIGH);
+    digitalWrite(DE_KERALIGHTS, HIGH);
+    // Save energy turning off the lights
+    if (lightGraphic[i] == 0) {
+      SEND(ALL, TURNOFF);
+    } else {
+      // Turn on the lights if they were turned off
+      if (lightIntensity == 0) {
+        SEND(ALL, TURNON);
+      }
+      SENDP(ALL, SETPOW, lightGraphic[i]);
+    }
+    lightIntensity = lightGraphic[i];
+  }
+}
 
+void checkLightStatus() {
+  //TODO list of broken to 0
+  for (int i = 0; i < numLights; i++) {
+    digitalWrite(RE_KERALIGHTS, HIGH);
+    digitalWrite(DE_KERALIGHTS, HIGH);
+    SEND((uint8_t) (i+1), QUERY);
+    digitalWrite(RE_KERALIGHTS, LOW);
+    digitalWrite(DE_KERALIGHTS, LOW);
+    //TODO receive
+    //TODO update list of broken
+  }
   digitalWrite(RE_KERALIGHTS, HIGH);
   digitalWrite(DE_KERALIGHTS, HIGH);
 }
 
-void turnOnBroadcast(uint8_t intensity){
-  out[0] = 0x0;
-  out[1] = 0x7;
-  out[2] = intensity;
-  uint16_t crc = crc16(out, 3);
-  out[3] = (uint8_t) crc;
-  out[4] = (uint8_t) (crc >> 8);
-  Serial.println("outside data:");
-  for(int i = 0; i < 5; i++){
-    Serial.print(out[i]);
-    Serial.print("\t");
-  }
-  Serial.println();
-  for(int i = 0; i < 5; i++) ledSerial.write(out[i]);
-  ledSerial.flush();
-
-  out[0] = 0x0;
-  out[1] = 0x8;
-  crc = crc16(out, 2);
-  out[2] = (uint8_t) crc;
-  out[3] = (uint8_t) (crc >> 8);
-  for(int i = 0; i < 4; i++) ledSerial.write(out[i]);
-  ledSerial.flush();
+void updateLightConsum() {
+  
 }
 
-void turnOffBroadcast(){
-  out[0] = 0x0;
-  out[1] = 0x9;
-  uint16_t crc = crc16(out, 2);
-  out[2] = (uint8_t) crc;
-  out[3] = (uint8_t) (crc >> 8);
-  for(int i = 0; i < 4; i++) ledSerial.write(out[i]);
-  ledSerial.flush();
-}
-
-uint8_t turnOn(uint8_t intensity, uint8_t lightID);
-void turnOff(uint8_t lightID);
-
-// gets the intensity of the current light, 0 if no response is received
-uint16_t getIntensity(uint8_t lightID);
 
 uint16_t crc16(uint8_t *nData, uint16_t wLength){
   static uint16_t wCRCTable[] = {
@@ -112,12 +142,4 @@ uint16_t crc16(uint8_t *nData, uint16_t wLength){
     wCRCWord ^= wCRCTable[nTemp];
   }
   return wCRCWord;
-}
-
-
-void setLightIntensity() {
-  int i = cityInfo.timeZone();
-  Serial.print("Setting light intensity to: ");
-  Serial.println(lightGraphic[i]);
-  turnOnBroadcast(lightGraphic[i]);
 }

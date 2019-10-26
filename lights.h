@@ -16,18 +16,27 @@ const uint8_t lightGraphic[48] =
 #define RE_KERALIGHTS 17
 #define DE_KERALIGHTS 14
 
-// Initialization of serial port and light drivers
+/** 
+ * @brief Initialization of serial port and light drivers.
+ */
 void initLights();
 
-void turnOnBroadcast(uint8_t intensity);
-void turnOffBroadcast();
-
-uint8_t turnOn(uint8_t intensity, uint8_t lightID);
-void turnOff(uint8_t lightID);
-
-// gets the intensity of the current light, 0 if no response is received
-uint16_t getIntensity(uint8_t lightID);
-
+/**
+ * @brief Set the light intensity according to current time and events.
+ * Gets time from cityStatus.
+ * Accesses current events.
+ */
 void setLightIntensity();
+
+/**
+ * @brief Check the integrity of the light system
+ * Updates broken lights in cityStatus.
+ */
+void checkLightStatus();
+
+/**
+ * @brief Updates the light consum in cityStatus.
+ */
+void updateLightConsum();
 
 #endif
