@@ -15,6 +15,12 @@ uint16_t crc16(uint8_t *nData, uint16_t wLength);
 #define TURNOFF 0x09
 #define SETPOW  0x07
 
+uint8_t lightIntensity60[18];
+uint8_t lightIntensity100[18];
+uint8_t lightIntensity120[18];
+uint8_t lightIntensity140[18];
+uint8_t lightIntensity150[18];
+uint8_t lightIntensity180[18];
 
 #define SEND(who, opcode)         \
   do {                            \
@@ -41,6 +47,7 @@ uint16_t crc16(uint8_t *nData, uint16_t wLength);
 
 
 const int numLights = 18;
+const int numTotalLights = 40;
 int lightPower = 0;
 
 void initLights(){
@@ -113,21 +120,22 @@ void setLightIntensity() {
 }
 
 void checkLightStatus() {
+  int totalBrokenLights = 0;
+  float consum = 0.0;
   // Selects the table to look at
   int power = lightGraphic[cityInfo.timeZone()];
   uint8_t * lightIntensity;
   switch(power){
-    60 : lightIntensity = lightIntensity60; break;
-    100 : lightIntensity = lightIntensity100; break;
-    120 : lightIntensity = lightIntensity120; break;
-    140 : lightIntensity = lightIntensity140; break;
-    150 : lightIntensity = lightIntensity150; break;
-    180 : lightIntensity = lightIntensity180; break;
+    case 60 : lightIntensity = lightIntensity60; break;
+    case 100 : lightIntensity = lightIntensity100; break;
+    case 120 : lightIntensity = lightIntensity120; break;
+    case 140 : lightIntensity = lightIntensity140; break;
+    case 150 : lightIntensity = lightIntensity150; break;
+    case 180 : lightIntensity = lightIntensity180; break;
   }
 
   // checks that the readings of every street match the ones recorded in the array
   for (int i = 0; i < numLights; i++) {
-    int brokenLights = 0;
     digitalWrite(RE_KERALIGHTS, HIGH);
     digitalWrite(DE_KERALIGHTS, HIGH);
     SEND((uint8_t) (i+1), QUERY);
@@ -136,24 +144,29 @@ void checkLightStatus() {
     long t = millis();
     while(!ledSerial.available() && t + 200 > millis());
     if(t + 200 > millis()){
-      while(ledSerial.available()) serial.readBytes(in, 8);
+      int brokenLights = 0;
+      while(ledSerial.available()) ledSerial.readBytes(in, 8);
       uint16_t intensity = (uint16_t)in[5] + ((uint16_t)in[4] << 8);
-
+      consum += (float)intensity;
       //Calculates the number of broken lamps
       if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.85) > intensity) brokenLights++;
-      if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.55) > intensity)) brokenLights++;
-      if(streetLights[i] == 2 && (uint16_t)(lightIntensity[i] * 0.4) > intensity) brokenLights++;
+      if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.55) > intensity) brokenLights++;
+      if(streetLights[i] == 2 && (uint16_t)(lightIntensity[i] * 0.35) > intensity) brokenLights++;
       if((uint16_t)(lightIntensity[i] * 0.15) > intensity) brokenLights++;
+      totalBrokenLights += brokenLights;
+      if(brokenLights > 0) cityStatus.lightsBrokenList.push_back(i+1);
     }
     else{
-      brokenLights = streetLights[i];
+      totalBrokenLights = streetLights[i];
     }
-
-    
-    // TODO send information
   }
   digitalWrite(RE_KERALIGHTS, HIGH);
   digitalWrite(DE_KERALIGHTS, HIGH);
+
+  cityStatus.lightsTotalCost = 24 * consum/1000 * cityInfo.lightPrice;
+  cityStatus.lightsTotalConsum = consum;
+  cityStatus.numLightsOk = numTotalLights - totalBrokenLights;
+  cityStatus.numLightsBroken = totalBrokenLights;
 }
 
 void updateLightConsum() {

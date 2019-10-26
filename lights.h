@@ -11,13 +11,6 @@ const uint8_t lightGraphic[48] =
 
 const uint8_t streetLights[18] = {2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3};
 
-const uint8_t lightIntensity60[18];
-const uint8_t lightIntensity100[18];
-const uint8_t lightIntensity120[18];
-const uint8_t lightIntensity140[18];
-const uint8_t lightIntensity150[18];
-const uint8_t lightIntensity180[18];
-
 #define RX_KERALIGHTS 36
 #define TX_KERALIGHTS 4
 #define RE_KERALIGHTS 17
