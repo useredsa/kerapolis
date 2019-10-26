@@ -68,7 +68,20 @@ std::string encodeStatus() {
 	doc["KERAPolisStatus"]["lightRunning"] = cityStatus.lightRunning;
   doc["KERAPolisStatus"]["numLightsOk"] = cityStatus.numLightsOk;
   doc["KERAPolisStatus"]["numLightsBroken"] = cityStatus.numLightsBroken;
-  doc["KERAPolisStatus"]["lightsBrokenList"] = cityStatus.lightRunning;
+  static char brokenList[50];
+  char* pos = brokenList;
+  *(pos++) = '[';
+  for (int i = 0; i < (int) cityStatus.lightsBrokenList.size(); i++) {
+    if (i) *(pos++) = ',';
+    itoa(cityStatus.lightsBrokenList[i], pos, 10);
+    if (cityStatus.lightsBrokenList[i] < 10)
+      pos++;
+    else
+      pos+=2;
+  }
+  *(pos++) = ']';
+  *(pos++) = '\0';
+  doc["KERAPolisStatus"]["lightsBrokenList"] = brokenList;
   doc["KERAPolisStatus"]["lightsTotalConsum"] = cityStatus.lightsTotalConsum;
   doc["KERAPolisStatus"]["lightsTotalCost"] = cityStatus.lightsTotalCost;
   doc["KERAPolisStatus"]["farmWatering"] = cityStatus.farmWatering;

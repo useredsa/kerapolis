@@ -8,6 +8,12 @@ uint8_t out[5];
 uint8_t in[8];
 uint16_t crc16(uint8_t *nData, uint16_t wLength);
 
+
+#define RX_KERALIGHTS 36
+#define TX_KERALIGHTS 4
+#define RE_KERALIGHTS 17
+#define DE_KERALIGHTS 14
+
 #define ALL     0x00
 #define ENABLE  0x04
 #define QUERY   0x02
@@ -15,12 +21,14 @@ uint16_t crc16(uint8_t *nData, uint16_t wLength);
 #define TURNOFF 0x09
 #define SETPOW  0x07
 
-uint8_t lightIntensity60[18];
-uint8_t lightIntensity100[18];
-uint8_t lightIntensity120[18];
-uint8_t lightIntensity140[18];
-uint8_t lightIntensity150[18];
-uint8_t lightIntensity180[18];
+bool enabled[numLights];
+uint8_t lightIntensity0[numLights];
+uint8_t lightIntensity60[numLights];
+uint8_t lightIntensity100[numLights];
+uint8_t lightIntensity120[numLights];
+uint8_t lightIntensity140[numLights];
+uint8_t lightIntensity150[numLights];
+uint8_t lightIntensity180[numLights];
 
 #define SEND(who, opcode)         \
   do {                            \
@@ -45,8 +53,6 @@ uint8_t lightIntensity180[18];
     ledSerial.flush();            \
   } while (0)
 
-
-const int numLights = 18;
 const int numTotalLights = 40;
 int lightPower = 0;
 
@@ -58,7 +64,9 @@ void initLights(){
   digitalWrite(DE_KERALIGHTS, HIGH);
   // Initialize connection
   ledSerial.begin(115200, SERIAL_8E1, RX_KERALIGHTS, TX_KERALIGHTS);
-  SEND(ALL, ENABLE);
+  SENDP(ALL, ENABLE, 0x01);
+  for (int i = 0; i < numLights; i++)
+    enabled[i] = true;
 }
 
 void lightsTest(){
@@ -122,7 +130,9 @@ void checkLightStatus() {
   // Selects the table to look at
   int power = lightGraphic[cityInfo.timeZone()];
   uint8_t * lightIntensity;
-  switch(power){
+  switch(power) {
+    default:
+    case 0: lightIntensity = lightIntensity0; break;
     case 60 : lightIntensity = lightIntensity60; break;
     case 100 : lightIntensity = lightIntensity100; break;
     case 120 : lightIntensity = lightIntensity120; break;
@@ -131,16 +141,19 @@ void checkLightStatus() {
     case 180 : lightIntensity = lightIntensity180; break;
   }
 
+  cityStatus.lightsBrokenList.clear();
+
   // checks that the readings of every street match the ones recorded in the array
   for (int i = 0; i < numLights; i++) {
+    if (!enabled[i]) continue;
     digitalWrite(RE_KERALIGHTS, HIGH);
     digitalWrite(DE_KERALIGHTS, HIGH);
-    SEND((uint8_t) (i+1), QUERY);
+    SEND((i+1), QUERY);
     digitalWrite(RE_KERALIGHTS, LOW);
     digitalWrite(DE_KERALIGHTS, LOW);
     long t = millis();
-    while(!ledSerial.available() && t + 200 > millis());
-    if(t + 200 > millis()){
+    while(!ledSerial.available() && t + 5 > millis());
+    if(t + 5 > millis()){
       int brokenLights = 0;
       while(ledSerial.available()) ledSerial.readBytes(in, 8);
       uint16_t intensity = (uint16_t)in[5] + ((uint16_t)in[4] << 8);
@@ -148,20 +161,22 @@ void checkLightStatus() {
       //Calculates the number of broken lamps
       if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.85) > intensity) brokenLights++;
       if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.55) > intensity) brokenLights++;
-      if(streetLights[i] == 2 && (uint16_t)(lightIntensity[i] * 0.35) > intensity) brokenLights++;
+      if(streetLights[i] == 2 && (uint16_t)(lightIntensity[i] * 0.6) > intensity) brokenLights++;
       if((uint16_t)(lightIntensity[i] * 0.15) > intensity) brokenLights++;
       totalBrokenLights += brokenLights;
       if(brokenLights > 0) cityStatus.lightsBrokenList.push_back(i+1);
+      else lightIntensity[i] = intensity*0.4+lightIntensity[i]*0.6;
+    } else {
+      totalBrokenLights += streetLights[i];
+      cityStatus.lightsBrokenList.push_back(i+1);
     }
-    else{
-      totalBrokenLights = streetLights[i];
-    }
+    delay(5);
   }
   digitalWrite(RE_KERALIGHTS, HIGH);
   digitalWrite(DE_KERALIGHTS, HIGH);
 
-  cityStatus.lightsTotalCost = 24 * consum/1000 * cityInfo.lightPrice;
   cityStatus.lightsTotalConsum = consum;
+  cityStatus.lightsTotalCost = 24 * consum * cityInfo.lightPrice;
   cityStatus.numLightsOk = numTotalLights - totalBrokenLights;
   cityStatus.numLightsBroken = totalBrokenLights;
 }
@@ -171,15 +186,18 @@ void manageEvents() {
     if (cityEvents[i].status == CityEvent::Status::NOT_STARTED) {
       if (cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
         cityEvents[i].status = CityEvent::Status::STARTED;
-        cityEvents[i].zone = 1;
         SEND(cityEvents[i].zone, TURNOFF);
         SENDP(cityEvents[i].zone, ENABLE, 0x00);
+        enabled[cityEvents[i].zone] = false;
         Serial.println("Started Event");
       }
     } else if (cityEvents[i].status == CityEvent::Status::STARTED) {
       if (!cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
         cityEvents[i].status = CityEvent::Status::UNSET;
         SENDP(cityEvents[i].zone, ENABLE, 0x01);
+        SENDP(cityEvents[i].zone, SETPOW, lightGraphic[cityInfo.timeZone()]);
+        SEND(cityEvents[i].zone, TURNON);
+        enabled[cityEvents[i].zone] = true;
         Serial.println("Ended Event");
       }
     }

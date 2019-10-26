@@ -11,6 +11,7 @@ void setup(){
   delay(100);
   // Connect to the WiFi network
   connectToWiFi(networkName, networkPswd);
+  cityStatus.lightRunning = true;
   initLights();
 }
 
@@ -46,6 +47,8 @@ bool isStatus(char *buf) {
 
 const int updateLapsus = 1000;
 int lastUpdate = 0;
+const int lightCheckLapsus = 2500;
+int lastCheck = 0;
 
 void loop(){
   if (connected) {
@@ -67,22 +70,19 @@ void loop(){
     }
   }
 
-  //checkLightStatus();
   manageEvents();
   setLightIntensity();
   
   int mil = millis();
+  if (lastCheck+lightCheckLapsus < mil) {
+    lastCheck = mil;
+    checkLightStatus();
+  }
   if (lastUpdate+updateLapsus < mil) {
     lastUpdate = mil;
+    Serial.print("Time: ");
+    Serial.println(cityInfo.localTime().toString());
     cityStatus.frameTime = cityInfo.localTime();
     sendCityStatus();
-    Serial.print("Time: ");
-    Serial.print(cityInfo.time.toString());
-    Serial.print("  Status ");
-    Serial.print(cityStatus.frameTime.toString());
-    Serial.print(" Gasto(A) ");
-    Serial.print(cityStatus.lightsTotalConsum);
-    Serial.print(" Consum ");
-    Serial.println(cityStatus.lightsTotalCost);
   }
 }

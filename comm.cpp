@@ -39,8 +39,9 @@ void WiFiEvent(WiFiEvent_t event){
 }
 
 void sendCityStatus() {
-  udp.beginPacket(serverAddress, udpPort);
+  udp.beginPacket("192.168.0.255", udpPort);
   std::string s = encodeStatus(); //TODO better use string reference (string&) or char*
   udp.printf("%s", s.c_str());
   udp.endPacket();
+  Serial.println(s.c_str());
 }

@@ -9,12 +9,8 @@ const uint8_t lightGraphic[48] =
       0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,  180,  180,  180,  180,  150,  150,  150,  150,  120,   60,   60 };
 // 12:0, 12:3, 13:0, 13:3, 14:0, 14:3, 15:0, 15:3, 16:0, 16:3, 17:0, 17:3, 18:0, 18:3, 19:0, 19:3, 20:0, 20:3, 21:0, 21:3, 22:0, 22:3, 23:0, 23:3
 
-const uint8_t streetLights[18] = {2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3};
-
-#define RX_KERALIGHTS 36
-#define TX_KERALIGHTS 4
-#define RE_KERALIGHTS 17
-#define DE_KERALIGHTS 14
+const int numLights = 18;
+const uint8_t streetLights[numLights] = {2, 2, 3, 3, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3};
 
 void lightsTest();
 
