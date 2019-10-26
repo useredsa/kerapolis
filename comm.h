@@ -3,6 +3,7 @@
 
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include <AsyncUDP.h>
 
 // WiFi IDs
 //static const char *networkName = "UJI";
@@ -21,6 +22,7 @@ extern boolean connected;
 
 //The udp library class
 extern WiFiUDP udp;
+extern AsyncUDP ethUDP;
 
 void connectToWiFi(const char * ssid, const char * pwd);
 

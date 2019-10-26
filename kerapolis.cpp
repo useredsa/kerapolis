@@ -77,6 +77,7 @@ void loop(){
   if (lastCheck+lightCheckLapsus < mil) {
     lastCheck = mil;
     checkLightStatus();
+    ethUDP.writeTo((uint8_t*) "Anyone here?", 6, IPAddress(192,168,0,81), 1024);
   }
   if (lastUpdate+updateLapsus < mil) {
     lastUpdate = mil;

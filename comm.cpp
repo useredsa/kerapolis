@@ -1,9 +1,11 @@
 #include "comm.h"
 #include "JSONParser.h"
+#include "ETH.h"
 #include <string>
 
 boolean connected = false;
 WiFiUDP udp;
+AsyncUDP ethUDP;
 
 void connectToWiFi(const char * ssid, const char * pwd){
   Serial.println("Connecting to WiFi network: " + String(ssid));
@@ -16,6 +18,9 @@ void connectToWiFi(const char * ssid, const char * pwd){
   WiFi.begin(ssid, pwd);
 
   Serial.println("Waiting for WIFI connection...");
+
+  ETH.begin();
+  ETH.config(IPAddress(192,168,0,42), IPAddress(192,168,0,1), IPAddress(255,255,255,0));
 }
 
 //wifi event handler
