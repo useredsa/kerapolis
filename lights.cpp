@@ -67,11 +67,8 @@ void setLightIntensity() {
     if (lightGraphic[i] == 0) {
       SEND(ALL, TURNOFF);
     } else {
-      // Turn on the lights if they were turned off
-      if (lightIntensity == 0) {
-        SEND(ALL, TURNON);
-      }
       SENDP(ALL, SETPOW, lightGraphic[i]);
+      SEND(ALL, TURNON);
     }
     lightIntensity = lightGraphic[i];
   }
@@ -92,8 +89,28 @@ void checkLightStatus() {
   digitalWrite(DE_KERALIGHTS, HIGH);
 }
 
-void updateLightConsum() {
-  
+void manageEvents() {
+  for (int i = 0; i < maxNumEvents; i++) {
+    if (cityEvents[i].status == CityEvent::Status::NOT_STARTED) {
+//      Serial.print("Event: ");
+//      Serial.print(cityEvents[i].startTime.toString());
+//      Serial.print("  ");
+//      Serial.println(cityEvents[i].endTime.toString());
+      if (cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
+        cityEvents[i].status = CityEvent::Status::STARTED;
+        cityEvents[i].zone = 1;
+        SEND(cityEvents[i].zone, TURNOFF);
+        SENDP(cityEvents[i].zone, ENABLE, 0x00);
+        Serial.println("Started Event");
+      }
+    } else if (cityEvents[i].status == CityEvent::Status::STARTED) {
+      if (!cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
+        cityEvents[i].status = CityEvent::Status::UNSET;
+        SENDP(cityEvents[i].zone, ENABLE, 0x01);
+        Serial.println("Ended Event");
+      }
+    }
+  }
 }
 
 

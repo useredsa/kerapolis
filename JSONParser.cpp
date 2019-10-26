@@ -8,9 +8,6 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-CityInfo cityInfo;
-CityStatus cityStatus;
-
 void printCityInfo();
 void printCityStatus();
 
@@ -18,11 +15,11 @@ void parseInfo(char *inputData) {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
 	if (error == ArduinoJson::DeserializationError::Ok) {
-		cityInfo.time = doc["KERAPolisInfo"]["time"];
+		cityInfo.time.fromString(doc["KERAPolisInfo"]["time"]);
 		cityInfo.lightPrice = doc["KERAPolisInfo"]["lightPrice"];
 		cityInfo.humidity = doc["KERAPolisInfo"]["humidity"];
 		cityInfo.temperature = doc["KERAPolisInfo"]["temperature"];
-    printCityInfo();
+    //printCityInfo();
 	}
 #ifdef TELL
 	else {
@@ -34,13 +31,25 @@ void parseInfo(char *inputData) {
 void parseEvent(char *inputData) {
   ArduinoJson::StaticJsonDocument<250> doc;
   ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, (char *)inputData);
-  if (error == ArduinoJson::DeserializationError::Ok)
-  {
-    //cityInfo.time = doc["KERAPolisInfo"]["time"];
-    //cityInfo.lightPrice = doc["KERAPolisInfo"]["lightPrice"];
-    //cityInfo.humidity = doc["KERAPolisInfo"]["humidity"];
-    //cityInfo.temperature = doc["KERAPolisInfo"]["temperature"];
-    //printCityInfo();
+  if (error == ArduinoJson::DeserializationError::Ok) {
+    for (int i = 0; i < maxNumEvents; i++) {
+      if (cityEvents[i].status == CityEvent::Status::UNSET) {
+        cityEvents[i].status = CityEvent::Status::NOT_STARTED;
+        cityEvents[i].description = "streetLightsOff"; //TODO hardcoded
+        cityEvents[i].zone = doc["KERAPolisEvent"]["zone"];
+        cityEvents[i].receivedTime = cityInfo.localTime();
+        cityEvents[i].startTime.fromString(doc["KERAPolisEvent"]["startTime"]);
+        cityEvents[i].endTime.fromString(doc["KERAPolisEvent"]["endTime"]);
+        Serial.print("Received EVENT!!!: zone ");
+        Serial.print(cityEvents[i].zone);
+        Serial.print(" times[] ");
+        Serial.print(cityEvents[i].startTime.toString());
+        Serial.print(" ");
+        Serial.println(cityEvents[i].endTime.toString());
+        return;
+      }
+    }
+    Serial.println("Event couldn't be parsed because there were too many events");
   }
 #ifdef TELL
   else {
@@ -53,8 +62,7 @@ void parseEvent(char *inputData) {
 std::string encodeStatus() {
 	char statusJSON[800];
 	ArduinoJson::StaticJsonDocument<800> doc;
-
-	doc["KERAPolisStatus"]["time"] = cityStatus.frameTime.c_str();
+	doc["KERAPolisStatus"]["time"] = cityStatus.frameTime.toString();
 	doc["KERAPolisStatus"]["farmRunning"] = cityStatus.farmRunning;
 	doc["KERAPolisStatus"]["waterRunning"] = cityStatus.waterRunning;
 	doc["KERAPolisStatus"]["lightRunning"] = cityStatus.lightRunning;
@@ -71,14 +79,14 @@ std::string encodeStatus() {
   doc["KERAPolisStatus"]["waterPressure"] = cityStatus.waterPressure;
   doc["KERAPolisStatus"]["waterPumpPercentage"] = cityStatus.waterPumpPercentage;
 	ArduinoJson::serializeJson(doc, statusJSON); 
-  printCityStatus();
+  //printCityStatus();
 	return std::string(statusJSON);
 }
     
 void printCityInfo() {
     Serial.print("KERAPolis Info received -->");
     Serial.print("[time:");
-    Serial.print(cityInfo.time);
+    Serial.print(cityInfo.time.toString());
     Serial.print("][humidity:");
     Serial.print(cityInfo.humidity);    
     Serial.print("][temperature:");
@@ -90,7 +98,7 @@ void printCityInfo() {
 void printCityStatus() {
     Serial.print("KERAPolis STATUS SENT --> ");
     Serial.print("[time:");
-    Serial.print(cityStatus.frameTime.c_str());
+    Serial.print(cityStatus.frameTime.toString());
     Serial.print("][farmRunning:");
     Serial.print(cityStatus.farmRunning);    
     Serial.print("][waterRunning:");

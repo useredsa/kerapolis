@@ -31,12 +31,13 @@ void setLightIntensity();
 /**
  * @brief Check the integrity of the light system
  * Updates broken lights in cityStatus.
+ * Updates consum in cityStatus.
  */
 void checkLightStatus();
 
 /**
- * @brief Updates the light consum in cityStatus.
+ * @brief Checks if an event is taken place and disables that street.
  */
-void updateLightConsum();
+void manageEvents();
 
 #endif
