@@ -165,7 +165,7 @@ void checkLightStatus() {
       if((uint16_t)(lightIntensity[i] * 0.15) > intensity) brokenLights++;
       totalBrokenLights += brokenLights;
       if(brokenLights > 0) cityStatus.lightsBrokenList.push_back(i+1);
-      else lightIntensity[i] = intensity*0.4+lightIntensity[i]*0.6;
+      else lightIntensity[i] = intensity;
     } else {
       totalBrokenLights += streetLights[i];
       cityStatus.lightsBrokenList.push_back(i+1);

@@ -22,7 +22,8 @@ extern boolean connected;
 
 //The udp library class
 extern WiFiUDP udp;
-extern AsyncUDP ethUDP;
+extern AsyncUDP ethOut;
+extern AsyncUDP ethIn;
 
 void connectToWiFi(const char * ssid, const char * pwd);
 

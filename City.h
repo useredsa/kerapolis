@@ -38,7 +38,7 @@ struct CityStatus {
   int farmRoofPosition = 0;
   bool farmTempOk = false;
   bool waterOk = false;
-  char waterTankLevel = 0;
+  int waterTankLevel = 0;
   int  waterPressure = 0;
   int waterPumpPercentage = 0;
 };

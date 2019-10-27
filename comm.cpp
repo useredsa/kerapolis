@@ -5,7 +5,8 @@
 
 boolean connected = false;
 WiFiUDP udp;
-AsyncUDP ethUDP;
+AsyncUDP ethOut;
+AsyncUDP ethIn;
 
 void connectToWiFi(const char * ssid, const char * pwd){
   Serial.println("Connecting to WiFi network: " + String(ssid));
@@ -13,7 +14,7 @@ void connectToWiFi(const char * ssid, const char * pwd){
   WiFi.disconnect(true);
   //register event handler
   WiFi.onEvent(WiFiEvent);
-  
+
   //Initiate connection
   WiFi.begin(ssid, pwd);
 
@@ -27,9 +28,9 @@ void connectToWiFi(const char * ssid, const char * pwd){
 void WiFiEvent(WiFiEvent_t event){
     switch(event) {
       case SYSTEM_EVENT_STA_GOT_IP:
-          //When connected set 
+          //When connected set
           Serial.print("WiFi connected! IP address: ");
-          Serial.println(WiFi.localIP());  
+          Serial.println(WiFi.localIP());
           //initializes the UDP state
           //This initializes the transfer buffer
           udp.begin(WiFi.localIP(), udpPort);

@@ -91,21 +91,21 @@ std::string encodeStatus() {
   doc["KERAPolisStatus"]["waterTankLevel"] = cityStatus.waterTankLevel;
   doc["KERAPolisStatus"]["waterPressure"] = cityStatus.waterPressure;
   doc["KERAPolisStatus"]["waterPumpPercentage"] = cityStatus.waterPumpPercentage;
-	ArduinoJson::serializeJson(doc, statusJSON); 
+	ArduinoJson::serializeJson(doc, statusJSON);
   //printCityStatus();
 	return std::string(statusJSON);
 }
-    
+
 void printCityInfo() {
     Serial.print("KERAPolis Info received -->");
     Serial.print("[time:");
     Serial.print(cityInfo.time.toString());
     Serial.print("][humidity:");
-    Serial.print(cityInfo.humidity);    
+    Serial.print(cityInfo.humidity);
     Serial.print("][temperature:");
     Serial.print(cityInfo.temperature);
     Serial.print("]");
-    Serial.println();        
+    Serial.println();
 }
 
 void printCityStatus() {
@@ -113,35 +113,35 @@ void printCityStatus() {
     Serial.print("[time:");
     Serial.print(cityStatus.frameTime.toString());
     Serial.print("][farmRunning:");
-    Serial.print(cityStatus.farmRunning);    
+    Serial.print(cityStatus.farmRunning);
     Serial.print("][waterRunning:");
     Serial.print(cityStatus.waterRunning);
     Serial.print("][lightRunning:");
-    Serial.print(cityStatus.lightRunning);    
+    Serial.print(cityStatus.lightRunning);
     Serial.print("][numLightsOk:");
-    Serial.print(cityStatus.numLightsOk);    
+    Serial.print(cityStatus.numLightsOk);
     Serial.print("][numLightsBroken:");
-    Serial.print(cityStatus.numLightsBroken);    
+    Serial.print(cityStatus.numLightsBroken);
     Serial.print("][lightBrokenList:");
-    Serial.print(cityStatus.lightRunning);    
+    Serial.print(cityStatus.lightRunning);
     Serial.print("][lightsTotalConsum:");
-    Serial.print(cityStatus.lightsTotalConsum);    
+    Serial.print(cityStatus.lightsTotalConsum);
     Serial.print("][lightsTotalCost:");
-    Serial.print(cityStatus.lightsTotalCost);    
+    Serial.print(cityStatus.lightsTotalCost);
     Serial.print("][farmWatering:");
-    Serial.print(cityStatus.farmWatering);    
+    Serial.print(cityStatus.farmWatering);
     Serial.print("][farmRoofPosition:");
-    Serial.print(cityStatus.farmRoofPosition);                
+    Serial.print(cityStatus.farmRoofPosition);
     Serial.print("][farmTempOk:");
-    Serial.print(cityStatus.farmTempOk);                
+    Serial.print(cityStatus.farmTempOk);
     Serial.print("][waterOk:");
-    Serial.print(cityStatus.waterOk);                
+    Serial.print(cityStatus.waterOk);
     Serial.print("][waterTankLevel:");
-    Serial.print(cityStatus.waterTankLevel);                
+    Serial.print(cityStatus.waterTankLevel);
     Serial.print("][waterPressure:");
-    Serial.print(cityStatus.waterPressure);                
+    Serial.print(cityStatus.waterPressure);
     Serial.print("][waterPumpPercentage:");
-    Serial.print(cityStatus.waterPumpPercentage);                
+    Serial.print(cityStatus.waterPumpPercentage);
     Serial.print("]");
-    Serial.println();        
+    Serial.println();
 }
