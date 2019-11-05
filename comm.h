@@ -25,7 +25,7 @@ extern WiFiUDP udp;
 extern AsyncUDP ethOut;
 extern AsyncUDP ethIn;
 
-void connectToWiFi(const char * ssid, const char * pwd);
+void internetSetUp(const char * ssid, const char * pwd);
 
 //wifi event handler
 void WiFiEvent(WiFiEvent_t event);

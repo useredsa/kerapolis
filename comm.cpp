@@ -8,7 +8,7 @@ WiFiUDP udp;
 AsyncUDP ethOut;
 AsyncUDP ethIn;
 
-void connectToWiFi(const char * ssid, const char * pwd){
+void internetSetUp(const char * ssid, const char * pwd){
   Serial.println("Connecting to WiFi network: " + String(ssid));
   // delete old config
   WiFi.disconnect(true);

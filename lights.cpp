@@ -1,10 +1,15 @@
 #include "lights.h"
+
 #include "JSONParser.h"
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
+/*
+ * Serial Communication variables and Macros
+ */
+
 HardwareSerial ledSerial(1);
-uint8_t out[5];
+uint8_t out[5];   //Revision: Could use the stack instead of global array
 uint8_t in[8];
 uint16_t crc16(uint8_t *nData, uint16_t wLength);
 
@@ -20,15 +25,6 @@ uint16_t crc16(uint8_t *nData, uint16_t wLength);
 #define TURNON  0x08
 #define TURNOFF 0x09
 #define SETPOW  0x07
-
-bool enabled[numLights];
-uint8_t lightIntensity0[numLights];
-uint8_t lightIntensity60[numLights];
-uint8_t lightIntensity100[numLights];
-uint8_t lightIntensity120[numLights];
-uint8_t lightIntensity140[numLights];
-uint8_t lightIntensity150[numLights];
-uint8_t lightIntensity180[numLights];
 
 #define SEND(who, opcode)         \
   do {                            \
@@ -53,10 +49,20 @@ uint8_t lightIntensity180[numLights];
     ledSerial.flush();            \
   } while (0)
 
+
 const int numTotalLights = 40;
+bool enabled[numLights];
+uint8_t lightIntensity0[numLights];
+uint8_t lightIntensity60[numLights];
+uint8_t lightIntensity100[numLights];
+uint8_t lightIntensity120[numLights];
+uint8_t lightIntensity140[numLights];
+uint8_t lightIntensity150[numLights];
+uint8_t lightIntensity180[numLights];
 int lightPower = 0;
 
 void initLights(){
+  // Set serial pins to output mode
   pinMode(RE_KERALIGHTS, OUTPUT);
   pinMode(DE_KERALIGHTS, OUTPUT);
   // Initialize pins to write
@@ -64,20 +70,17 @@ void initLights(){
   digitalWrite(DE_KERALIGHTS, HIGH);
   // Initialize connection
   ledSerial.begin(115200, SERIAL_8E1, RX_KERALIGHTS, TX_KERALIGHTS);
+  // Enable the lights
   SENDP(ALL, ENABLE, 0x01);
   for (int i = 0; i < numLights; i++)
     enabled[i] = true;
 }
 
+/**
+ * @brief small function to test, not for use
+ */
 void lightsTest(){
   SENDP(0x0, SETPOW, 0x40);
-  /*digitalWrite(RE_KERALIGHTS, LOW);
-  digitalWrite(DE_KERALIGHTS, LOW);
-  while(!ledSerial.available());
-  while(ledSerial.available()){
-    Serial.print((uint8_t)ledSerial.read());
-    Serial.print("\t");
-  }*/
   digitalWrite(RE_KERALIGHTS, HIGH);
   digitalWrite(DE_KERALIGHTS, HIGH);
   SEND(0x0, TURNON);
@@ -106,8 +109,6 @@ void lightsTest(){
 
 void setLightIntensity() {
   int i = cityInfo.timeZone();
-//  Serial.print("Setting light intensity to: ");
-//  Serial.println(lightGraphic[i]);
   // Only update on change:
   if (lightPower != lightGraphic[i]) {
     // Set pins to write
@@ -126,9 +127,9 @@ void setLightIntensity() {
 
 void checkLightStatus() {
   int totalBrokenLights = 0;
+  int power = lightGraphic[cityInfo.timeZone()];
   float consum = 0.0;
   // Selects the table to look at
-  int power = lightGraphic[cityInfo.timeZone()];
   uint8_t * lightIntensity;
   switch(power) {
     default:
@@ -141,28 +142,39 @@ void checkLightStatus() {
     case 180 : lightIntensity = lightIntensity180; break;
   }
 
+  // Clear the list of broken lights to update it now
+  // Alternatively, we could do a scan on broken lights to check if they
+  // are fixed
   cityStatus.lightsBrokenList.clear();
 
-  // checks that the readings of every street match the ones recorded in the array
+  // Checks that the readings of every street match the ones recorded in the array
   for (int i = 0; i < numLights; i++) {
     if (!enabled[i]) continue;
+    // Query state
     digitalWrite(RE_KERALIGHTS, HIGH);
     digitalWrite(DE_KERALIGHTS, HIGH);
     SEND((i+1), QUERY);
+
+    // Read result
     digitalWrite(RE_KERALIGHTS, LOW);
     digitalWrite(DE_KERALIGHTS, LOW);
     long t = millis();
-    while(!ledSerial.available() && t + 5 > millis());
+    while(!ledSerial.available() && t + 5 > millis()); // harcoded timeout of 5 ms
     if(t + 5 > millis()){
-      int brokenLights = 0;
       while(ledSerial.available()) ledSerial.readBytes(in, 8);
       uint16_t intensity = (uint16_t)in[5] + ((uint16_t)in[4] << 8);
+      // Get intensity, update consum and check if its value is normal
       consum += (float)intensity;
-      //Calculates the number of broken lamps
+      // Calculates the number of broken lamps
+      // Hardcoding values! :D
+      int brokenLights = 0;
       if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.85) > intensity) brokenLights++;
       if(streetLights[i] == 3 && (uint16_t)(lightIntensity[i] * 0.55) > intensity) brokenLights++;
       if(streetLights[i] == 2 && (uint16_t)(lightIntensity[i] * 0.6) > intensity) brokenLights++;
       if((uint16_t)(lightIntensity[i] * 0.15) > intensity) brokenLights++;
+
+      // If the any light is broken update info
+      // Otherwise update the table or normal intensity
       totalBrokenLights += brokenLights;
       if(brokenLights > 0) cityStatus.lightsBrokenList.push_back(i+1);
       else lightIntensity[i] = intensity;
@@ -189,7 +201,7 @@ void manageEvents() {
         SEND(cityEvents[i].zone, TURNOFF);
         SENDP(cityEvents[i].zone, ENABLE, 0x00);
         enabled[cityEvents[i].zone] = false;
-        Serial.println("Started Event");
+        Serial.println("Event started!!");
       }
     } else if (cityEvents[i].status == CityEvent::Status::STARTED) {
       if (!cityInfo.localTime().between(cityEvents[i].startTime, cityEvents[i].endTime)) {
@@ -198,7 +210,7 @@ void manageEvents() {
         SENDP(cityEvents[i].zone, SETPOW, lightGraphic[cityInfo.timeZone()]);
         SEND(cityEvents[i].zone, TURNON);
         enabled[cityEvents[i].zone] = true;
-        Serial.println("Ended Event");
+        Serial.println("Event finished :(");
       }
     }
   }

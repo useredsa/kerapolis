@@ -1,5 +1,3 @@
-#define TELL
-
 #include "JSONParser.h"
 #include "comm.h"
 #include "Arduino.h"
@@ -17,14 +15,15 @@ int32_t pump1, pump2, pressure1, pressure2; // pump 2 is tank pump
 uint8_t ev1Status = 0;
 
 void setup(){
-  // Initilize hardware serial:
-  Serial.begin(115200);
-  delay(100);
-  // Connect to the WiFi network
-  connectToWiFi(networkName, networkPswd);
+  // Running challenges
   cityStatus.lightRunning = true;
   cityStatus.farmRunning = true;
   cityStatus.waterRunning = true;
+  // Initilize hardware serial (communication with PC)
+  Serial.begin(115200);
+  delay(100);
+  // Connect to the WiFi network
+  internetSetUp(networkName, networkPswd);
   initLights();
   // Connect farm servo
   farmWindow.attach(13);
@@ -96,6 +95,9 @@ int lastUpdate = 0;
 const int lightCheckLapsus = 2500;
 int lastCheck = 0;
 
+
+// The mess
+//TODO put constants everywhere
 void loop(){
   if (connected) {
     int pkgSize = udp.parsePacket();

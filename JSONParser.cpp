@@ -1,12 +1,7 @@
-//---------------------------------------------------------------------------
-
-#pragma hdrstop
-
 #include "JSONParser.h"
+
 #include <ArduinoJson.h>
 #include <string>
-//---------------------------------------------------------------------------
-#pragma package(smart_init)
 
 void printCityInfo();
 void printCityStatus();
@@ -21,11 +16,7 @@ void parseInfo(char *inputData) {
 		cityInfo.temperature = doc["KERAPolisInfo"]["temperature"];
     //printCityInfo();
 	}
-#ifdef TELL
-	else {
-    Serial.println("problem parsing json");
-	}
-#endif
+  // Problem parsing!
 }
 
 void parseEvent(char *inputData) {
@@ -51,11 +42,7 @@ void parseEvent(char *inputData) {
     }
     Serial.println("Event couldn't be parsed because there were too many events");
   }
-#ifdef TELL
-  else {
-    Serial.println("problem parsing json");
-  }
-#endif
+  // Problem parsing!
 }
 
 
@@ -97,7 +84,7 @@ std::string encodeStatus() {
 }
 
 void printCityInfo() {
-    Serial.print("KERAPolis Info received -->");
+    Serial.print("KERAPolis Info -->");
     Serial.print("[time:");
     Serial.print(cityInfo.time.toString());
     Serial.print("][humidity:");
@@ -109,7 +96,7 @@ void printCityInfo() {
 }
 
 void printCityStatus() {
-    Serial.print("KERAPolis STATUS SENT --> ");
+    Serial.print("KERAPolis STATUS --> ");
     Serial.print("[time:");
     Serial.print(cityStatus.frameTime.toString());
     Serial.print("][farmRunning:");
