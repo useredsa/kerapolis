@@ -1,2 +1,2 @@
 # HackathonCastello
-Solving KeraJet's hackathon challenge: Controlling an smart city.
+Solving KeraJet's hackathon challenge: Controlling a smart city.
